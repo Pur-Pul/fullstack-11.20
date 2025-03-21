@@ -19,11 +19,24 @@ jobs:
               run: npm install
             - name: Check style
               run: npm run lint
-            - name: build
-              run: npm run build
+
+            - name: Start MongoDB
+              uses: supercharge/mongodb-github-action@1.12.0
+              with:
+                  mongodb-version: '8.0'
+                  mongodb-username: tester
+                  mongodb-password: secret
+                  mongodb-db: test
+
             - name: test
+              env:
+                  TEST_MONGODB_URI: 'mongodb+srv://tester:secret@127.0.0.1:27017/test'
+                  PORT: 3003
+                  SECRET: ${{ secrets.TOKEN }}
               run: npm run test
 
+            - name: build
+              run: npm run build
             - name: Install Playwright Browsers
               run: npx playwright install --with-deps
             - name: Run Playwright tests
