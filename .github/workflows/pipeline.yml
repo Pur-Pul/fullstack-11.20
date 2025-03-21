@@ -1,0 +1,75 @@
+name: Pipeline
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+        types: [opened, synchronize]
+
+jobs:
+    pipeline:
+        runs-on: ubuntu-20.04
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+            - name: Install dependencies
+              run: npm install
+            - name: Check style
+              run: npm run lint
+            - name: build
+              run: npm run build
+            - name: test
+              run: npm run test
+
+            - name: Install Playwright Browsers
+              run: npx playwright install --with-deps
+            - name: Run Playwright tests
+              run: npm run test:e2e
+            - uses: actions/upload-artifact@v4
+              if: ${{ !cancelled() }}
+              with:
+                  name: playwright-report
+                  path: playwright-report/
+                  retention-days: 30
+
+            #- name: Deploy
+            #  if: ${{ (success()) && (github.event_name == 'push') && (toJson(contains(join(github.event.commits.*.message), '#skip')) == 'false') }}
+            #  uses: JorgeLNJunior/render-deploy@v1.4.5
+            #  with:
+            #    service_id: ${{ secrets.RENDER_SERVICE_ID }}
+            #    api_key: ${{ secrets.RENDER_API_KEY }}
+            #    wait_deploy: true
+
+            #- name: Deploy Success
+            #  env:
+            #    DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+            #    URL: ${{ vars.URL }}
+            #  uses: Ilshidur/action-discord@0.3.2
+            #  if: ${{ (success()) && (github.event_name == 'push') && (toJson(contains(join(github.event.commits.*.message), '#skip')) == 'false') }}
+            #  with:
+            #    args: 'Commit by {{ EVENT_PAYLOAD.commits[0].author.username }} deployed to {{ URL }}'
+
+            #- name: Deploy Failure
+            #  env:
+            #    DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+            #  uses: Ilshidur/action-discord@0.3.2
+            #  if: failure()
+            #  with:
+            #    args: 'Commit {{ EVENT_PAYLOAD.commits[0].url }} by {{ EVENT_PAYLOAD.commits[0].author.username }} broke the build.'
+
+    tag_release:
+        needs: [pipeline]
+        if: ${{ (github.event_name == 'push') && (toJson(contains(join(github.event.commits.*.message), '#skip')) == 'false') }}
+        runs-on: ubuntu-20.04
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: '0'
+            - name: Bump version and push tag
+              uses: anothrNick/github-tag-action@1.64.0
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  DEFAULT_BUMP: patch
