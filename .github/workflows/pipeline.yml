@@ -48,30 +48,30 @@ jobs:
                   path: playwright-report/
                   retention-days: 30
 
-            #- name: Deploy
-            #  if: ${{ (success()) && (github.event_name == 'push') && (toJson(contains(join(github.event.commits.*.message), '#skip')) == 'false') }}
-            #  uses: JorgeLNJunior/render-deploy@v1.4.5
-            #  with:
-            #    service_id: ${{ secrets.RENDER_SERVICE_ID }}
-            #    api_key: ${{ secrets.RENDER_API_KEY }}
-            #    wait_deploy: true
+            - name: Deploy
+              if: ${{ (success()) && (github.event_name == 'push') && (toJson(contains(join(github.event.commits.*.message), '#skip')) == 'false') }}
+              uses: JorgeLNJunior/render-deploy@v1.4.5
+              with:
+                  service_id: ${{ secrets.RENDER_SERVICE_ID }}
+                  api_key: ${{ secrets.RENDER_API_KEY }}
+                  wait_deploy: true
 
-            #- name: Deploy Success
-            #  env:
-            #    DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-            #    URL: ${{ vars.URL }}
-            #  uses: Ilshidur/action-discord@0.3.2
-            #  if: ${{ (success()) && (github.event_name == 'push') && (toJson(contains(join(github.event.commits.*.message), '#skip')) == 'false') }}
-            #  with:
-            #    args: 'Commit by {{ EVENT_PAYLOAD.commits[0].author.username }} deployed to {{ URL }}'
+            - name: Deploy Success
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+                  URL: ${{ vars.URL }}
+              uses: Ilshidur/action-discord@0.3.2
+              if: ${{ (success()) && (github.event_name == 'push') && (toJson(contains(join(github.event.commits.*.message), '#skip')) == 'false') }}
+              with:
+                  args: 'Commit by {{ EVENT_PAYLOAD.commits[0].author.username }} deployed to {{ URL }}'
 
-            #- name: Deploy Failure
-            #  env:
-            #    DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-            #  uses: Ilshidur/action-discord@0.3.2
-            #  if: failure()
-            #  with:
-            #    args: 'Commit {{ EVENT_PAYLOAD.commits[0].url }} by {{ EVENT_PAYLOAD.commits[0].author.username }} broke the build.'
+            - name: Deploy Failure
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+              uses: Ilshidur/action-discord@0.3.2
+              if: failure()
+              with:
+                  args: 'Commit {{ EVENT_PAYLOAD.commits[0].url }} by {{ EVENT_PAYLOAD.commits[0].author.username }} broke the build.'
 
     tag_release:
         needs: [pipeline]
