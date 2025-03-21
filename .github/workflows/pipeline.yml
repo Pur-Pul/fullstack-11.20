@@ -30,7 +30,7 @@ jobs:
 
             - name: test
               env:
-                  TEST_MONGODB_URI: 'mongodb+srv://tester:secret@127.0.0.1:27017/test'
+                  TEST_MONGODB_URI: 'mongodb://tester:secret@127.0.0.1/test'
                   PORT: 3003
                   SECRET: ${{ secrets.TOKEN }}
               run: npm run test
