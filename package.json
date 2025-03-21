@@ -7,7 +7,7 @@
 		"dev": "cross-env NODE_ENV=developement nodemon index.js",
 		"test": "cross-env NODE_ENV=test node --test --test-concurrency=1",
 		"start:test": "cross-env NODE_ENV=test node index.js",
-		"test:e2e": "playwright test",
+		"test:e2e": "cross-env NODE_ENV=test playwright test",
 		"test:report": "playwright show-report",
 		"build": "vite build",
 		"lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
