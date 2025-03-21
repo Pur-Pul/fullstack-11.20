@@ -10,6 +10,10 @@ on:
 jobs:
     pipeline:
         runs-on: ubuntu-20.04
+        env:
+            TEST_MONGODB_URI: mongodb://tester:secret@localhost/test?authMechanism=DEFAULT&authSource=admin
+            PORT: 3003
+            SECRET: ${{ secrets.TOKEN }}
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-node@v4
@@ -29,10 +33,6 @@ jobs:
                   mongodb-db: test
 
             - name: test
-              env:
-                  TEST_MONGODB_URI: mongodb://tester:secret@localhost/test?authMechanism=DEFAULT&authSource=admin
-                  PORT: 3003
-                  SECRET: ${{ secrets.TOKEN }}
               run: npm run test
 
             - name: build
